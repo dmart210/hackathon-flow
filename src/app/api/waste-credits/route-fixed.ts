@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { creditsStore } from '@/lib/credits-store';
 
 // FlowGlad integrated waste credit processing
 interface CreditRequest {
@@ -20,9 +19,7 @@ export async function POST(request: NextRequest) {
     const body: CreditRequest = await request.json();
     
     // Calculate credit amount based on waste cost (80% refund policy)
-    // Convert GBP to USD (approximate 1.25 exchange rate) and use cents
-    const costInUSD = (body.cost || 0) * 1.25;
-    const creditAmount = Math.floor(costInUSD * 100 * 0.8); // 80% refund in cents
+    const creditAmount = body.cost ? Math.floor(body.cost * 100 * 0.8) : body.amount;
     
     // Simulate FlowGlad API call for credit processing
     await new Promise(resolve => setTimeout(resolve, 800));
@@ -32,7 +29,7 @@ export async function POST(request: NextRequest) {
     const credit = {
       id: creditId,
       amount: creditAmount,
-      currency: 'USD',
+      currency: body.currency || 'GBP',
       status: 'completed',
       created_at: new Date().toISOString(),
       description: body.description || `Waste credit for ${body.item_name || 'food item'}`,
@@ -42,27 +39,21 @@ export async function POST(request: NextRequest) {
         wasteAmount: body.quantity || 1,
         location: body.location || 'Kitchen',
         source: 'FlowGlad Auto-Credit System',
-        originalCost: Math.floor(costInUSD * 100),
-        originalCostGBP: body.cost ? Math.floor(body.cost * 100) : undefined,
+        originalCost: body.cost ? Math.floor(body.cost * 100) : undefined,
         reason: body.reason || 'Waste incident',
         processing_method: 'flowglad_api',
-        exchange_rate: 1.25,
         ...body.metadata
       }
     };
 
-    // Save credit to store for real-time display
-    creditsStore.addCredit(credit);
-
-    console.log('FlowGlad credit processed and saved:', credit);
+    console.log('FlowGlad credit processed:', credit);
 
     return NextResponse.json({
       success: true,
       credit: credit,
-      message: 'Credit successfully processed via FlowGlad API and saved to account',
+      message: 'Credit successfully processed via FlowGlad API',
       processing_time: '0.8s',
-      api_version: '2024.1',
-      exchange_info: 'GBP to USD conversion applied (1.25 rate)'
+      api_version: '2024.1'
     });
 
   } catch (error) {

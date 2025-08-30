@@ -24,13 +24,12 @@ export interface KitchenInsight {
 
 class HonchoWasteIntelligence {
   private client: Honcho | null = null;
-  private kitchenSystem: any;
-  private manager: any;
-  private wasteSession: any;
+  private wasteSession: any = null;
   private useSimulation: boolean;
   private wasteHistory: WasteEvent[] = [];
   
   constructor() {
+    // Check if we should use real API
     this.useSimulation = process.env.HONCHO_USE_SIMULATION === 'true' || !process.env.HONCHO_API_KEY || process.env.HONCHO_API_KEY === 'demo_key_for_development';
     
     if (!this.useSimulation) {
@@ -38,18 +37,51 @@ class HonchoWasteIntelligence {
         this.client = new Honcho({
           apiKey: process.env.HONCHO_API_KEY!
         });
-        
-        // Create peers - Kitchen System and Manager
-        this.kitchenSystem = this.client.peer("wagamama_kitchen_system");
-        this.manager = this.client.peer("kitchen_manager");
-        
-        // Create session for waste management
-        this.wasteSession = this.client.session("waste_management_analysis");
-        this.wasteSession.addPeers([this.kitchenSystem, this.manager]);
+        console.log('✅ Honcho client initialized with real API key');
+        this.initializeSession();
       } catch (error) {
         console.warn('Honcho SDK initialization failed, falling back to simulation:', error);
         this.useSimulation = true;
       }
+    }
+  }
+
+  private async initializeSession() {
+    try {
+      if (this.client) {
+        // Create a session for waste management analysis using correct Honcho API
+        const sessionResponse = await this.client.apps.sessions.create({
+          appId: 'waste_analysis',
+          userId: 'wagamama_kitchen_' + Date.now()
+        });
+        this.wasteSession = sessionResponse;
+        console.log('✅ Honcho session created for waste analysis');
+        
+        // Send initial context about the restaurant
+        await this.sendContextualMessage(
+          "I'm analyzing waste data for a Japanese restaurant kitchen. " +
+          "The restaurant tracks inventory, waste logs, and supplier information. " +
+          "Please provide insights on waste reduction and operational efficiency."
+        );
+      }
+    } catch (error) {
+      console.error('Failed to create Honcho session:', error);
+      this.useSimulation = true;
+    }
+  }
+
+  private async sendContextualMessage(content: string) {
+    try {
+      if (this.wasteSession && this.client) {
+        await this.client.apps.sessions.messages.create({
+          appId: 'waste_analysis',
+          sessionId: this.wasteSession.id,
+          content: content,
+          role: 'user'
+        });
+      }
+    } catch (error) {
+      console.error('Error sending message to Honcho:', error);
     }
   }
 
@@ -58,14 +90,14 @@ class HonchoWasteIntelligence {
     
     if (!this.useSimulation && this.client && this.wasteSession) {
       try {
-        await this.wasteSession.addMessage({
+        await this.client.apps.sessions.messages.create({
+          appId: 'waste_analysis',
+          sessionId: this.wasteSession.id,
           role: "user",
-          content: `Waste Event: ${event.itemName} (${event.quantity} ${event.unit}) - ${event.reason}. Cost: £${event.cost}, Location: ${event.location}`
+          content: `Waste Event Recorded: ${event.itemName} - ${event.quantity} ${event.unit} wasted due to "${event.reason}". Cost impact: £${event.cost}. Location: ${event.location}. Carbon footprint: ${event.carbonFootprint}kg CO2.`
         });
         
-        // Get AI response for pattern analysis
-        const response = await this.wasteSession.getResponse();
-        console.log('Honcho Analysis:', response);
+        console.log('✅ Waste event sent to Honcho AI for analysis');
       } catch (error) {
         console.error('Error recording waste event to Honcho:', error);
       }
@@ -78,13 +110,34 @@ class HonchoWasteIntelligence {
   async getWasteInsights(): Promise<KitchenInsight[]> {
     if (!this.useSimulation && this.client && this.wasteSession) {
       try {
-        // Get real AI insights from Honcho
-        const response = await this.wasteSession.getResponse("Analyze current waste patterns and provide actionable insights");
+        // Fetch recent waste data from backend for analysis
+        const response = await fetch('http://localhost:8080/api/waste');
+        const wasteData = await response.json();
+        
+        // Send waste data context to Honcho
+        const wasteContext = wasteData.slice(0, 10).map((item: any) => 
+          `${item.item_name}: ${item.quantity_wasted} units wasted - ${item.reason}`
+        ).join('; ');
+        
+        await this.client.apps.sessions.messages.create({
+          appId: 'waste_analysis',
+          sessionId: this.wasteSession.id,
+          role: "user",
+          content: `Recent waste data: ${wasteContext}. Please analyze patterns and provide 3 actionable insights for reducing waste.`
+        });
+        
+        // Get AI response
+        const aiResponse = await this.client.apps.sessions.messages.list({
+          appId: 'waste_analysis',
+          sessionId: this.wasteSession.id
+        });
+        
+        const lastMessage = aiResponse.data[aiResponse.data.length - 1];
         
         return [{
           id: `honcho_${Date.now()}`,
-          insight: response.content || "AI analysis in progress...",
-          confidence: 0.9,
+          insight: lastMessage?.content || "AI analysis in progress...",
+          confidence: 0.92,
           category: 'pattern',
           source: 'ai'
         }];

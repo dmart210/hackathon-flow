@@ -74,7 +74,25 @@ export default function Dashboard() {
                 FlowGlad Billing
               </a>
               <a 
-                href="/flowglad-test" 
+                href="/trends" 
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              >
+                Data Trends
+              </a>
+              <a 
+                href="/why-us" 
+                className="px-4 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-lg hover:from-orange-600 hover:to-red-600 transition-all shadow-lg"
+              >
+                Why Us?
+              </a>
+              <a 
+                href="/honcho-test" 
+                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg hover:from-purple-600 hover:to-blue-600 transition-all shadow-lg"
+              >
+                Honcho AI Test
+              </a>
+              <a 
+                href="/api-test" 
                 className="px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm"
               >
                 Test API

@@ -122,72 +122,11 @@ export function FlowGladCredit({
             <CheckCircle className="w-6 h-6 text-green-600" />
             <div>
               <p className="text-green-800 font-medium">
-                {creditResponse.currency}{creditResponse.amount} Credit Issued!
+                Credit Issued!
               </p>
               <p className="text-green-600 text-sm">
                 Refund processed to Wagamama account
               </p>
-            </div>
-          </div>
-          
-          {/* FlowGlad API Communication Details */}
-          <div className="bg-white/50 p-4 rounded border mb-3">
-            <h4 className="text-sm font-semibold text-gray-800 mb-2 flex items-center gap-2">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              FlowGlad API Response
-            </h4>
-            
-            <div className="space-y-2 text-xs">
-              {/* Transaction ID */}
-              <div className="flex justify-between items-center py-1 px-2 bg-blue-50 rounded">
-                <span className="font-medium text-blue-700">Transaction ID:</span>
-                <span className="font-mono text-blue-800 bg-blue-100 px-2 py-0.5 rounded">
-                  {creditResponse.creditId}
-                </span>
-              </div>
-              
-              {/* Status */}
-              <div className="flex justify-between items-center py-1 px-2 bg-green-50 rounded">
-                <span className="font-medium text-green-700">Status:</span>
-                <span className="font-mono text-green-800 bg-green-100 px-2 py-0.5 rounded uppercase">
-                  {creditResponse.status}
-                </span>
-              </div>
-              
-              {/* Amount & Currency */}
-              <div className="flex justify-between items-center py-1 px-2 bg-emerald-50 rounded">
-                <span className="font-medium text-emerald-700">Amount:</span>
-                <span className="font-mono text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
-                  {creditResponse.currency}{creditResponse.amount}
-                </span>
-              </div>
-              
-              {/* Processed Timestamp */}
-              <div className="flex justify-between items-center py-1 px-2 bg-purple-50 rounded">
-                <span className="font-medium text-purple-700">Processed At:</span>
-                <span className="font-mono text-purple-800 bg-purple-100 px-2 py-0.5 rounded text-xs">
-                  {new Date(creditResponse.processedAt).toLocaleTimeString('en-GB')}
-                </span>
-              </div>
-            </div>
-          </div>
-          
-          {/* API Endpoint Information */}
-          <div className="bg-slate-50 p-3 rounded border">
-            <h5 className="text-xs font-semibold text-slate-700 mb-2">🔗 FlowGlad Integration</h5>
-            <div className="text-xs text-slate-600 space-y-1">
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-green-500 rounded-full"></div>
-                <span>API: /api/waste-credits</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-blue-500 rounded-full"></div>
-                <span>Method: POST</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 bg-purple-500 rounded-full"></div>
-                <span>Response: 200 OK</span>
-              </div>
             </div>
           </div>
         </div>
