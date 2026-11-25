@@ -1,7 +1,13 @@
 // /api/flowglad/[...path]/route.ts
-import { createAppRouterRouteHandler } from '@flowglad/nextjs/server';
-import { flowgladServer } from '@/app/flowglad';
+// The @flowglad/nextjs package is no longer published on npm, so the live
+// billing proxy is disabled. The client (src/lib/flowglad.ts) falls back to
+// its built-in simulation when this route is unavailable.
+import { NextResponse } from 'next/server';
 
-const routeHandler = createAppRouterRouteHandler(flowgladServer);
+const unavailable = () =>
+  NextResponse.json(
+    { error: 'FlowGlad billing unavailable; running in demo simulation mode' },
+    { status: 503 }
+  );
 
-export { routeHandler as GET, routeHandler as POST };
+export { unavailable as GET, unavailable as POST };

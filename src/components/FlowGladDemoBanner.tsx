@@ -9,7 +9,7 @@ export function FlowGladDemoBanner() {
 
   useEffect(() => {
     // Show partial API key for demo (hiding sensitive parts)
-    setApiKey('sk_test_2UmCX4sLhSFxmEcVB4wLDxNEeMoqAQ5gckppoCwSvVYSUo');
+    setApiKey('sk_test_demo_xxxxxxxxxxxxxxxxxxxxxxxxxxxx');
     
     // Simulate getting the latest transaction ID
     const generateTransactionId = () => {

@@ -387,7 +387,7 @@ export default function TrendsDemo() {
                 <XAxis dataKey="name" />
                 <YAxis />
                 <Tooltip formatter={(value, name) => [
-                  name === 'totalValue' ? `£${value.toFixed(2)}` : `${value}`,
+                  name === 'totalValue' ? `£${Number(value).toFixed(2)}` : `${value}`,
                   name === 'totalValue' ? 'Total Value' : name === 'items' ? 'Items' : 'Total Stock'
                 ]} />
                 <Bar dataKey="totalValue" fill="#3b82f6" name="totalValue" />
